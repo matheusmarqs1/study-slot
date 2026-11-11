@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: study-slot-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: pwd123
+      POSTGRES_DB: studyslot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+  
+volumes:
+  postgres_data:
