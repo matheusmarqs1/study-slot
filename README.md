@@ -1,6 +1,6 @@
 # Study Slot
 
-A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and a read-only rooms endpoint is available.
+A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and read-only endpoints are available for rooms, users, and reservations.
 
 ## Stack
 
@@ -29,9 +29,11 @@ Flyway applies the migrations on startup. Connection settings live in `study-slo
 
 ## API
 
-| Method | Path            | Description        |
-|--------|-----------------|--------------------|
-| GET    | `/api/v1/rooms` | List all rooms     |
+| Method | Path                   | Description            |
+|--------|------------------------|------------------------|
+| GET    | `/api/v1/rooms`        | List all rooms         |
+| GET    | `/api/v1/users`        | List all users         |
+| GET    | `/api/v1/reservations` | List all reservations  |
 
 ## Database schema
 
