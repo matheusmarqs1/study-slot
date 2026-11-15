@@ -1,6 +1,6 @@
 # Study Slot
 
-A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and read-only endpoints are available for rooms, users, and reservations.
+A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and basic CRUD endpoints are available for rooms, users, and reservations.
 
 ## Stack
 
@@ -29,11 +29,31 @@ Flyway applies the migrations on startup. Connection settings live in `study-slo
 
 ## API
 
-| Method | Path                   | Description            |
-|--------|------------------------|------------------------|
-| GET    | `/api/v1/rooms`        | List all rooms         |
-| GET    | `/api/v1/users`        | List all users         |
-| GET    | `/api/v1/reservations` | List all reservations  |
+Each resource (`rooms`, `users`, `reservations`) exposes the same CRUD operations under `/api/v1/{resource}`:
+
+| Method | Path                         | Description              | Success |
+|--------|------------------------------|--------------------------|---------|
+| GET    | `/api/v1/{resource}`         | List all                 | 200     |
+| GET    | `/api/v1/{resource}/{id}`    | Get by id                | 200     |
+| POST   | `/api/v1/{resource}`         | Create                   | 201     |
+| PUT    | `/api/v1/{resource}/{id}`    | Update                   | 200     |
+| DELETE | `/api/v1/{resource}/{id}`    | Delete                   | 204     |
+
+`POST` returns a `Location` header pointing to the new resource.
+
+Creating a reservation takes the user and room by id:
+
+```json
+{
+  "user": { "id": 1 },
+  "room": { "id": 1 },
+  "startsAt": "2026-11-20T10:00:00Z",
+  "endsAt": "2026-11-20T11:00:00Z",
+  "status": "ACTIVE"
+}
+```
+
+Current limitations: the API exposes entities directly (no DTOs yet), and validation and error handling are not in place, so invalid input or missing ids return `500`.
 
 ## Database schema
 
