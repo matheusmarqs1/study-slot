@@ -29,17 +29,37 @@ Flyway applies the migrations on startup. Connection settings live in `study-slo
 
 ## API
 
-Each resource (`rooms`, `users`, `reservations`) exposes the same CRUD operations under `/api/v1/{resource}`:
+All routes are under `/api/v1`. `POST` returns a `Location` header pointing to the new resource.
 
-| Method | Path                         | Description              | Success |
-|--------|------------------------------|--------------------------|---------|
-| GET    | `/api/v1/{resource}`         | List all                 | 200     |
-| GET    | `/api/v1/{resource}/{id}`    | Get by id                | 200     |
-| POST   | `/api/v1/{resource}`         | Create                   | 201     |
-| PUT    | `/api/v1/{resource}/{id}`    | Update                   | 200     |
-| DELETE | `/api/v1/{resource}/{id}`    | Delete                   | 204     |
+### Rooms
 
-`POST` returns a `Location` header pointing to the new resource.
+| Method | Path                  | Description    | Success |
+|--------|-----------------------|----------------|---------|
+| GET    | `/api/v1/rooms`       | List all rooms | 200     |
+| GET    | `/api/v1/rooms/{id}`  | Get a room     | 200     |
+| POST   | `/api/v1/rooms`       | Create a room  | 201     |
+| PUT    | `/api/v1/rooms/{id}`  | Update a room  | 200     |
+| DELETE | `/api/v1/rooms/{id}`  | Delete a room  | 204     |
+
+### Users
+
+| Method | Path                  | Description    | Success |
+|--------|-----------------------|----------------|---------|
+| GET    | `/api/v1/users`       | List all users | 200     |
+| GET    | `/api/v1/users/{id}`  | Get a user     | 200     |
+| POST   | `/api/v1/users`       | Create a user  | 201     |
+| PUT    | `/api/v1/users/{id}`  | Update a user  | 200     |
+| DELETE | `/api/v1/users/{id}`  | Delete a user  | 204     |
+
+### Reservations
+
+| Method | Path                          | Description            | Success |
+|--------|-------------------------------|------------------------|---------|
+| GET    | `/api/v1/reservations`        | List all reservations  | 200     |
+| GET    | `/api/v1/reservations/{id}`   | Get a reservation      | 200     |
+| POST   | `/api/v1/reservations`        | Create a reservation   | 201     |
+| PUT    | `/api/v1/reservations/{id}`   | Update a reservation   | 200     |
+| DELETE | `/api/v1/reservations/{id}`   | Delete a reservation   | 204     |
 
 Creating a reservation takes the user and room by id:
 
