@@ -19,4 +19,27 @@ public class RoomService {
     public List<Room> findAll(){
         return roomRepository.findAll();
     }
+
+    public Room findById(Long id){
+        return roomRepository.findById(id).orElseThrow();
+    }
+
+    public Room create(Room room){
+        return roomRepository.save(room);
+    }
+
+    public Room update(Long id, Room room){
+        Room existingRoom = roomRepository.findById(id).orElseThrow();
+        existingRoom.setName(room.getName());
+        existingRoom.setCapacity(room.getCapacity());
+        existingRoom.setActive(room.getActive());
+        return roomRepository.save(existingRoom);
+    }
+
+    public void delete(Long id){
+        if(!roomRepository.existsById(id)) {
+            throw new RuntimeException();
+        }
+        roomRepository.deleteById(id);
+    }
 }
