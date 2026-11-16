@@ -1,6 +1,6 @@
 # Study Slot
 
-A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and basic CRUD endpoints are available for rooms, users, and reservations.
+A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and CRUD endpoints with DTOs and request validation are available for rooms, users, and reservations.
 
 ## Stack
 
@@ -61,19 +61,64 @@ All routes are under `/api/v1`. `POST` returns a `Location` header pointing to t
 | PUT    | `/api/v1/reservations/{id}`   | Update a reservation   | 200     |
 | DELETE | `/api/v1/reservations/{id}`   | Delete a reservation   | 204     |
 
-Creating a reservation takes the user and room by id:
+### Request examples
+
+Request and response bodies are DTOs, and request bodies are validated with Bean Validation (invalid input returns `400`).
+
+#### Create a room
+
+`active` is not sent on create: new rooms are always active.
+
+```json
+{ "name": "Study Room 01", "capacity": 6 }
+```
+
+#### Update a room
+
+```json
+{ "name": "Study Room 01", "capacity": 8, "active": false }
+```
+
+#### Create a user
+
+```json
+{ "name": "Maria Souza", "email": "maria.souza@email.com" }
+```
+
+#### Create a reservation
+
+The user and room are sent by id. `startsAt` must be in the future and `endsAt` must be after `startsAt`. New reservations start as `ACTIVE`.
 
 ```json
 {
-  "user": { "id": 1 },
-  "room": { "id": 1 },
+  "userId": 1,
+  "roomId": 1,
   "startsAt": "2026-11-20T10:00:00Z",
-  "endsAt": "2026-11-20T11:00:00Z",
-  "status": "ACTIVE"
+  "endsAt": "2026-11-20T11:00:00Z"
 }
 ```
 
-Current limitations: the API exposes entities directly (no DTOs yet), and validation and error handling are not in place, so invalid input or missing ids return `500`.
+Response:
+
+```json
+{
+  "id": 1,
+  "user": { "id": 1, "name": "Maria Souza" },
+  "room": { "id": 1, "name": "Study Room 01" },
+  "startsAt": "2026-11-20T10:00:00Z",
+  "endsAt": "2026-11-20T11:00:00Z",
+  "status": "ACTIVE",
+  "createdAt": "2026-11-16T15:00:00Z"
+}
+```
+
+`PUT /api/v1/reservations/{id}` only reschedules: it accepts `startsAt` and `endsAt`. The status is not editable through it.
+
+### Current limitations
+
+- Validation failures return `400` with Spring's default error body, not a custom format yet.
+- Missing ids, duplicate e-mails and deleting a room or user that has reservations return `500` (no global error handling yet).
+- No business rules yet (overlapping reservations, cancellation).
 
 ## Database schema
 
