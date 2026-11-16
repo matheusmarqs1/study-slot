@@ -4,6 +4,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+
+import com.github.matheusmarqs1.study_slot.dto.request.CreateReservationRequest;
+import com.github.matheusmarqs1.study_slot.dto.request.UpdateReservationRequest;
+import com.github.matheusmarqs1.study_slot.dto.response.ReservationResponse;
 import com.github.matheusmarqs1.study_slot.entity.Reservation;
 import com.github.matheusmarqs1.study_slot.entity.Room;
 import com.github.matheusmarqs1.study_slot.entity.User;
@@ -11,7 +15,7 @@ import com.github.matheusmarqs1.study_slot.repository.ReservationRepository;
 import com.github.matheusmarqs1.study_slot.repository.RoomRepository;
 import com.github.matheusmarqs1.study_slot.repository.UserRepository;
 
-@Service 
+@Service
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final UserRepository userRepository;
@@ -23,28 +27,33 @@ public class ReservationService {
         this.roomRepository = roomRepository;
     }
 
-    public List<Reservation> findAll(){
-        return reservationRepository.findAll();
+    public List<ReservationResponse> findAll(){
+        return reservationRepository.findAll().stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
-    public Reservation findById(Long id){
-        return reservationRepository.findById(id).orElseThrow();
+    public ReservationResponse findById(Long id){
+        return ReservationResponse.from(reservationRepository.findById(id).orElseThrow());
     }
 
-    public Reservation create(Reservation reservation){
-        User user = userRepository.findById(reservation.getUser().getId()).orElseThrow();
-        Room room = roomRepository.findById(reservation.getRoom().getId()).orElseThrow();
-        reservation.setUser(user);
-        reservation.setRoom(room);
-        return reservationRepository.save(reservation);
+    public ReservationResponse create(CreateReservationRequest request){
+        User user = userRepository.findById(request.userId()).orElseThrow();
+        Room room = roomRepository.findById(request.roomId()).orElseThrow();
+        Reservation reservation = Reservation.builder()
+                .user(user)
+                .room(room)
+                .startsAt(request.startsAt())
+                .endsAt(request.endsAt())
+                .build();
+        return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
-    public Reservation update(Long id, Reservation reservation){
+    public ReservationResponse update(Long id, UpdateReservationRequest request){
         Reservation existingReservation = reservationRepository.findById(id).orElseThrow();
-        existingReservation.setStartsAt(reservation.getStartsAt());
-        existingReservation.setEndsAt(reservation.getEndsAt());
-        existingReservation.setStatus(reservation.getStatus());
-        return reservationRepository.save(existingReservation);
+        existingReservation.setStartsAt(request.startsAt());
+        existingReservation.setEndsAt(request.endsAt());
+        return ReservationResponse.from(reservationRepository.save(existingReservation));
     }
 
     public void delete(Long id){

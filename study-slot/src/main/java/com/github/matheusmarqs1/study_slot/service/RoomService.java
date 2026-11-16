@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.github.matheusmarqs1.study_slot.dto.request.CreateRoomRequest;
+import com.github.matheusmarqs1.study_slot.dto.request.UpdateRoomRequest;
+import com.github.matheusmarqs1.study_slot.dto.response.RoomResponse;
 import com.github.matheusmarqs1.study_slot.entity.Room;
 import com.github.matheusmarqs1.study_slot.repository.RoomRepository;
 
@@ -16,24 +19,28 @@ public class RoomService {
         this.roomRepository = roomRepository;
     }
 
-    public List<Room> findAll(){
-        return roomRepository.findAll();
+    public List<RoomResponse> findAll(){
+        return roomRepository.findAll().stream().map(RoomResponse::from).toList();
     }
 
-    public Room findById(Long id){
-        return roomRepository.findById(id).orElseThrow();
+    public RoomResponse findById(Long id){
+        return RoomResponse.from(roomRepository.findById(id).orElseThrow());
     }
 
-    public Room create(Room room){
-        return roomRepository.save(room);
+    public RoomResponse create(CreateRoomRequest request){
+        Room room = Room.builder()
+                .name(request.name())
+                .capacity(request.capacity())
+                .build();
+        return RoomResponse.from(roomRepository.save(room));
     }
 
-    public Room update(Long id, Room room){
+    public RoomResponse update(Long id, UpdateRoomRequest request){
         Room existingRoom = roomRepository.findById(id).orElseThrow();
-        existingRoom.setName(room.getName());
-        existingRoom.setCapacity(room.getCapacity());
-        existingRoom.setActive(room.getActive());
-        return roomRepository.save(existingRoom);
+        existingRoom.setName(request.name());
+        existingRoom.setCapacity(request.capacity());
+        existingRoom.setActive(request.active());
+        return RoomResponse.from(roomRepository.save(existingRoom));
     }
 
     public void delete(Long id){

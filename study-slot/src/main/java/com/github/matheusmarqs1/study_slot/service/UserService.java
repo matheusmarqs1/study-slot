@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.github.matheusmarqs1.study_slot.dto.request.CreateUserRequest;
+import com.github.matheusmarqs1.study_slot.dto.request.UpdateUserRequest;
+import com.github.matheusmarqs1.study_slot.dto.response.UserResponse;
 import com.github.matheusmarqs1.study_slot.entity.User;
 import com.github.matheusmarqs1.study_slot.repository.UserRepository;
 
@@ -15,23 +18,29 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public List<User> findAll(){
-        return userRepository.findAll();
+    public List<UserResponse> findAll(){
+        return userRepository.findAll().stream()
+                .map(UserResponse::from)
+                .toList();
     }
 
-    public User findById(Long id){
-        return userRepository.findById(id).orElseThrow();
+    public UserResponse findById(Long id){
+        return UserResponse.from(userRepository.findById(id).orElseThrow());
     }
 
-    public User create(User user){
-        return userRepository.save(user);
+    public UserResponse create(CreateUserRequest request){
+        User user = User.builder()
+                .name(request.name())
+                .email(request.email())
+                .build();
+        return UserResponse.from(userRepository.save(user));
     }
 
-    public User update(Long id, User user){
+    public UserResponse update(Long id, UpdateUserRequest request){
         User existingUser = userRepository.findById(id).orElseThrow();
-        existingUser.setName(user.getName());
-        existingUser.setEmail(user.getEmail());
-        return userRepository.save(existingUser);
+        existingUser.setName(request.name());
+        existingUser.setEmail(request.email());
+        return UserResponse.from(userRepository.save(existingUser));
     }
 
     public void delete(Long id){
