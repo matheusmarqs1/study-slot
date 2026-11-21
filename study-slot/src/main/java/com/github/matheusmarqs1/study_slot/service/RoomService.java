@@ -8,6 +8,7 @@ import com.github.matheusmarqs1.study_slot.dto.request.CreateRoomRequest;
 import com.github.matheusmarqs1.study_slot.dto.request.UpdateRoomRequest;
 import com.github.matheusmarqs1.study_slot.dto.response.RoomResponse;
 import com.github.matheusmarqs1.study_slot.entity.Room;
+import com.github.matheusmarqs1.study_slot.exception.ResourceNotFoundException;
 import com.github.matheusmarqs1.study_slot.repository.RoomRepository;
 
 @Service 
@@ -24,7 +25,7 @@ public class RoomService {
     }
 
     public RoomResponse findById(Long id){
-        return RoomResponse.from(roomRepository.findById(id).orElseThrow());
+        return RoomResponse.from(roomRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room", id)));
     }
 
     public RoomResponse create(CreateRoomRequest request){
@@ -36,7 +37,7 @@ public class RoomService {
     }
 
     public RoomResponse update(Long id, UpdateRoomRequest request){
-        Room existingRoom = roomRepository.findById(id).orElseThrow();
+        Room existingRoom = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room", id));
         existingRoom.setName(request.name());
         existingRoom.setCapacity(request.capacity());
         existingRoom.setActive(request.active());
@@ -45,7 +46,7 @@ public class RoomService {
 
     public void delete(Long id){
         if(!roomRepository.existsById(id)) {
-            throw new RuntimeException();
+            throw new ResourceNotFoundException("Room", id);
         }
         roomRepository.deleteById(id);
     }

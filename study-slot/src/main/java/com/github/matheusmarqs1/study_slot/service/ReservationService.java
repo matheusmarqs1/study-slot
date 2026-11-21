@@ -11,6 +11,7 @@ import com.github.matheusmarqs1.study_slot.dto.response.ReservationResponse;
 import com.github.matheusmarqs1.study_slot.entity.Reservation;
 import com.github.matheusmarqs1.study_slot.entity.Room;
 import com.github.matheusmarqs1.study_slot.entity.User;
+import com.github.matheusmarqs1.study_slot.exception.ResourceNotFoundException;
 import com.github.matheusmarqs1.study_slot.repository.ReservationRepository;
 import com.github.matheusmarqs1.study_slot.repository.RoomRepository;
 import com.github.matheusmarqs1.study_slot.repository.UserRepository;
@@ -34,12 +35,12 @@ public class ReservationService {
     }
 
     public ReservationResponse findById(Long id){
-        return ReservationResponse.from(reservationRepository.findById(id).orElseThrow());
+        return ReservationResponse.from(reservationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Reservation", id)));
     }
 
     public ReservationResponse create(CreateReservationRequest request){
-        User user = userRepository.findById(request.userId()).orElseThrow();
-        Room room = roomRepository.findById(request.roomId()).orElseThrow();
+        User user = userRepository.findById(request.userId()).orElseThrow(() -> new ResourceNotFoundException("User", request.userId()));
+        Room room = roomRepository.findById(request.roomId()).orElseThrow(() -> new ResourceNotFoundException("Room", request.roomId()));
         Reservation reservation = Reservation.builder()
                 .user(user)
                 .room(room)
@@ -50,7 +51,7 @@ public class ReservationService {
     }
 
     public ReservationResponse update(Long id, UpdateReservationRequest request){
-        Reservation existingReservation = reservationRepository.findById(id).orElseThrow();
+        Reservation existingReservation = reservationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Reservation", id));
         existingReservation.setStartsAt(request.startsAt());
         existingReservation.setEndsAt(request.endsAt());
         return ReservationResponse.from(reservationRepository.save(existingReservation));
@@ -58,7 +59,7 @@ public class ReservationService {
 
     public void delete(Long id){
         if(!reservationRepository.existsById(id)) {
-            throw new RuntimeException();
+            throw new ResourceNotFoundException("Reservation", id);
         }
         reservationRepository.deleteById(id);
     }

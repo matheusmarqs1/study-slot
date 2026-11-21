@@ -8,6 +8,7 @@ import com.github.matheusmarqs1.study_slot.dto.request.CreateUserRequest;
 import com.github.matheusmarqs1.study_slot.dto.request.UpdateUserRequest;
 import com.github.matheusmarqs1.study_slot.dto.response.UserResponse;
 import com.github.matheusmarqs1.study_slot.entity.User;
+import com.github.matheusmarqs1.study_slot.exception.ResourceNotFoundException;
 import com.github.matheusmarqs1.study_slot.repository.UserRepository;
 
 @Service
@@ -25,7 +26,7 @@ public class UserService {
     }
 
     public UserResponse findById(Long id){
-        return UserResponse.from(userRepository.findById(id).orElseThrow());
+        return UserResponse.from(userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", id)));
     }
 
     public UserResponse create(CreateUserRequest request){
@@ -37,7 +38,7 @@ public class UserService {
     }
 
     public UserResponse update(Long id, UpdateUserRequest request){
-        User existingUser = userRepository.findById(id).orElseThrow();
+        User existingUser = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", id));
         existingUser.setName(request.name());
         existingUser.setEmail(request.email());
         return UserResponse.from(userRepository.save(existingUser));
@@ -45,7 +46,7 @@ public class UserService {
 
     public void delete(Long id){
         if(!userRepository.existsById(id)) {
-            throw new RuntimeException();
+            throw new ResourceNotFoundException("User", id);
         }
         userRepository.deleteById(id);
     }
