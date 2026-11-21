@@ -1,6 +1,6 @@
 # Study Slot
 
-A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and CRUD endpoints with DTOs and request validation are available for rooms, users, and reservations.
+A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and CRUD endpoints with DTOs, request validation and global error handling are available for rooms, users, and reservations.
 
 ## Stack
 
@@ -63,7 +63,7 @@ All routes are under `/api/v1`. `POST` returns a `Location` header pointing to t
 
 ### Request examples
 
-Request and response bodies are DTOs, and request bodies are validated with Bean Validation (invalid input returns `400`).
+Request and response bodies are DTOs, and request bodies are validated with Bean Validation (invalid input returns `400`, see [Error handling](#error-handling)).
 
 #### Create a room
 
@@ -93,8 +93,8 @@ The user and room are sent by id. `startsAt` must be in the future and `endsAt` 
 {
   "userId": 1,
   "roomId": 1,
-  "startsAt": "2026-11-20T10:00:00Z",
-  "endsAt": "2026-11-20T11:00:00Z"
+  "startsAt": "2026-12-05T10:00:00Z",
+  "endsAt": "2026-12-05T11:00:00Z"
 }
 ```
 
@@ -105,8 +105,8 @@ Response:
   "id": 1,
   "user": { "id": 1, "name": "Maria Souza" },
   "room": { "id": 1, "name": "Study Room 01" },
-  "startsAt": "2026-11-20T10:00:00Z",
-  "endsAt": "2026-11-20T11:00:00Z",
+  "startsAt": "2026-12-05T10:00:00Z",
+  "endsAt": "2026-12-05T11:00:00Z",
   "status": "ACTIVE",
   "createdAt": "2026-11-16T15:00:00Z"
 }
@@ -114,11 +114,34 @@ Response:
 
 `PUT /api/v1/reservations/{id}` only reschedules: it accepts `startsAt` and `endsAt`. The status is not editable through it.
 
+### Error handling
+
+Errors share one JSON format. `errors` is only present for validation failures.
+
+```json
+{
+  "timestamp": "2026-11-21T20:45:53Z",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Validation failed",
+  "path": "/api/v1/rooms",
+  "errors": [
+    { "field": "capacity", "message": "Room capacity must be at least 1" }
+  ]
+}
+```
+
+| Status | When                                                                 | `message`                          |
+|--------|----------------------------------------------------------------------|------------------------------------|
+| 400    | Request body fails validation                                        | `Validation failed` (plus `errors`) |
+| 400    | Malformed JSON, wrong types or invalid enum/date format              | `Malformed JSON request`           |
+| 404    | Room, user or reservation id does not exist                          | `Room with id 9999 not found`      |
+| 409    | Duplicate e-mail, or deleting a room or user that has reservations   | `Data integrity violation`         |
+
 ### Current limitations
 
-- Validation failures return `400` with Spring's default error body, not a custom format yet.
-- Missing ids, duplicate e-mails and deleting a room or user that has reservations return `500` (no global error handling yet).
 - No business rules yet (overlapping reservations, cancellation).
+- Unexpected server errors are not handled globally and fall back to Spring's default error body.
 
 ## Database schema
 
