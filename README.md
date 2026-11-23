@@ -1,6 +1,6 @@
 # Study Slot
 
-A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and CRUD endpoints with DTOs, request validation, global error handling and an overlapping-reservation rule are available for rooms, users, and reservations.
+A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and CRUD endpoints with DTOs, request validation, global error handling, and reservation rules (no overlaps, cancellation with minimum notice) are available for rooms, users, and reservations.
 
 ## Stack
 
@@ -58,7 +58,8 @@ All routes are under `/api/v1`. `POST` returns a `Location` header pointing to t
 | GET    | `/api/v1/reservations`        | List all reservations  | 200     |
 | GET    | `/api/v1/reservations/{id}`   | Get a reservation      | 200     |
 | POST   | `/api/v1/reservations`        | Create a reservation   | 201     |
-| PUT    | `/api/v1/reservations/{id}`   | Update a reservation   | 200     |
+| PUT    | `/api/v1/reservations/{id}`   | Reschedule a reservation | 200   |
+| PATCH  | `/api/v1/reservations/{id}/cancel` | Cancel a reservation | 200 |
 | DELETE | `/api/v1/reservations/{id}`   | Delete a reservation   | 204     |
 
 ### Request examples
@@ -120,6 +121,7 @@ Response:
 - Back-to-back reservations are allowed: one ending at 11:00 does not conflict with one starting at 11:00.
 - `CANCELLED` reservations do not block the room.
 - The overlap check happens in the service and is not safe under concurrent requests yet.
+- A reservation can only be cancelled through `PATCH /api/v1/reservations/{id}/cancel`, and only if it is `ACTIVE` and starts more than 2 hours from now. The status changes to `CANCELLED`.
 
 ### Error handling
 
@@ -145,10 +147,11 @@ Errors share one JSON format. `errors` is only present for validation failures.
 | 404    | Room, user or reservation id does not exist                          | `Room with id 9999 not found`      |
 | 409    | Duplicate e-mail, or deleting a room or user that has reservations   | `Data integrity violation`         |
 | 409    | Reservation overlaps an active reservation in the same room          | `The room is already reserved for the given time range` |
+| 409    | Cancelling a reservation that is not active                          | `Only active reservations can be cancelled` |
+| 409    | Cancelling a reservation less than 2 hours before it starts          | `Reservations can only be cancelled up to 2 hours before the start time` |
 
 ### Current limitations
 
-- Cancellation (with a minimum notice period) is not implemented yet.
 - Unexpected server errors are not handled globally and fall back to Spring's default error body.
 
 ## Database schema
