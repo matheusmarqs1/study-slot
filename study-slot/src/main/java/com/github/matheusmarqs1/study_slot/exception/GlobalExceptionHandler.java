@@ -49,4 +49,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(ErrorResponse.of(status, "Data integrity violation", request.getRequestURI()));
     }
 
+    @ExceptionHandler(ReservationConflictException.class)
+    public ResponseEntity<ErrorResponse> handleReservationConflict(ReservationConflictException ex, HttpServletRequest request){
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        return ResponseEntity.status(status).body(ErrorResponse.of(status, ex.getMessage(), request.getRequestURI()));
+    }
+
 }
