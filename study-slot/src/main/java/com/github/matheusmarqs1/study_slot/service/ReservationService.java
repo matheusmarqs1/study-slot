@@ -1,5 +1,6 @@
 package com.github.matheusmarqs1.study_slot.service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import com.github.matheusmarqs1.study_slot.entity.Reservation;
 import com.github.matheusmarqs1.study_slot.entity.ReservationStatus;
 import com.github.matheusmarqs1.study_slot.entity.Room;
 import com.github.matheusmarqs1.study_slot.entity.User;
-import com.github.matheusmarqs1.study_slot.exception.ReservationConflictException;
+import com.github.matheusmarqs1.study_slot.exception.BusinessRuleException;
 import com.github.matheusmarqs1.study_slot.exception.ResourceNotFoundException;
 import com.github.matheusmarqs1.study_slot.repository.ReservationRepository;
 import com.github.matheusmarqs1.study_slot.repository.RoomRepository;
@@ -21,6 +22,9 @@ import com.github.matheusmarqs1.study_slot.repository.UserRepository;
 
 @Service
 public class ReservationService {
+    
+    private static final Duration MIN_CANCELLATION_NOTICE = Duration.ofHours(2);
+
     private final ReservationRepository reservationRepository;
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
@@ -66,6 +70,19 @@ public class ReservationService {
         return ReservationResponse.from(reservationRepository.save(existingReservation));
     }
 
+    public ReservationResponse cancel(Long id){
+        Reservation existingReservation = reservationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Reservation", id));
+        if(existingReservation.getStatus() != ReservationStatus.ACTIVE) {
+            throw new BusinessRuleException("Only active reservations can be cancelled");
+        }
+        if(!Instant.now().isBefore(existingReservation.getStartsAt().minus(MIN_CANCELLATION_NOTICE))){
+            throw new BusinessRuleException("Reservations can only be cancelled up to " + MIN_CANCELLATION_NOTICE.toHours() + " hours before the start time");
+        }
+
+        existingReservation.setStatus(ReservationStatus.CANCELLED);
+        return ReservationResponse.from(reservationRepository.save(existingReservation));
+    }
+
     public void delete(Long id){
         if(!reservationRepository.existsById(id)) {
             throw new ResourceNotFoundException("Reservation", id);
@@ -79,7 +96,7 @@ public class ReservationService {
                 : reservationRepository.existsOverlappingExcluding(roomId, ReservationStatus.ACTIVE, excludedId, startsAt, endsAt);
         
         if(overlaps) {
-            throw new ReservationConflictException("The room is already reserved for the given time range");
+            throw new BusinessRuleException("The room is already reserved for the given time range");
         }
     }
 }

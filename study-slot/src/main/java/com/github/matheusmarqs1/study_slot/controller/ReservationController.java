@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -52,6 +53,11 @@ public class ReservationController {
     @PutMapping("/{id}")
     public ResponseEntity<ReservationResponse> update(@PathVariable Long id, @Valid @RequestBody UpdateReservationRequest request){
         return ResponseEntity.ok(reservationService.update(id, request));
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<ReservationResponse> cancel(@PathVariable Long id){
+        return ResponseEntity.ok(reservationService.cancel(id));
     }
 
     @DeleteMapping("/{id}")
