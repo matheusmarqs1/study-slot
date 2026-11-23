@@ -1,6 +1,6 @@
 # Study Slot
 
-A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and CRUD endpoints with DTOs, request validation and global error handling are available for rooms, users, and reservations.
+A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and CRUD endpoints with DTOs, request validation, global error handling and an overlapping-reservation rule are available for rooms, users, and reservations.
 
 ## Stack
 
@@ -114,6 +114,13 @@ Response:
 
 `PUT /api/v1/reservations/{id}` only reschedules: it accepts `startsAt` and `endsAt`. The status is not editable through it.
 
+### Business rules
+
+- A room cannot have two overlapping `ACTIVE` reservations. This is checked on create and on reschedule (a reservation never conflicts with itself).
+- Back-to-back reservations are allowed: one ending at 11:00 does not conflict with one starting at 11:00.
+- `CANCELLED` reservations do not block the room.
+- The overlap check happens in the service and is not safe under concurrent requests yet.
+
 ### Error handling
 
 Errors share one JSON format. `errors` is only present for validation failures.
@@ -137,10 +144,11 @@ Errors share one JSON format. `errors` is only present for validation failures.
 | 400    | Malformed JSON, wrong types or invalid enum/date format              | `Malformed JSON request`           |
 | 404    | Room, user or reservation id does not exist                          | `Room with id 9999 not found`      |
 | 409    | Duplicate e-mail, or deleting a room or user that has reservations   | `Data integrity violation`         |
+| 409    | Reservation overlaps an active reservation in the same room          | `The room is already reserved for the given time range` |
 
 ### Current limitations
 
-- No business rules yet (overlapping reservations, cancellation).
+- Cancellation (with a minimum notice period) is not implemented yet.
 - Unexpected server errors are not handled globally and fall back to Spring's default error body.
 
 ## Database schema
