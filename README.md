@@ -1,6 +1,6 @@
 # Study Slot
 
-A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and CRUD endpoints with DTOs, request validation, global error handling, and reservation rules (no overlaps, cancellation with minimum notice) are available for rooms, users, and reservations.
+A study room reservation backend built with Spring Boot. Early stage: the database schema is defined and CRUD endpoints with DTOs, request validation, global error handling, and reservation rules (no overlaps, cancellation with minimum notice) are available for rooms, users, and reservations. The API is documented with OpenAPI (Swagger UI).
 
 ## Stack
 
@@ -9,6 +9,7 @@ A study room reservation backend built with Spring Boot. Early stage: the databa
 - PostgreSQL 18
 - Flyway (schema migrations)
 - Lombok
+- springdoc-openapi (Swagger UI)
 - Maven
 
 ## Getting started
@@ -26,6 +27,11 @@ Run the application (from the `study-slot/` directory):
 ```
 
 Flyway applies the migrations on startup. Connection settings live in `study-slot/src/main/resources/application.properties`.
+
+Once the application is running, the API documentation is available at:
+
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- OpenAPI spec (JSON): http://localhost:8080/api-docs
 
 ## API
 
